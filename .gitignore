@@ -1,0 +1,4 @@
+# macOS / exFAT AppleDouble sidecar files — must never ship (the marketplace copies
+# every committed file verbatim into ~/.botnexus/plugins/<name>/).
+._*
+.DS_Store
