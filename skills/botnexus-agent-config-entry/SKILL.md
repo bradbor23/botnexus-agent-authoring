@@ -37,9 +37,12 @@ agents intact.
 | `enabled` | boolean | Whether the gateway loads the agent. |
 | `description` | string | One line shown in listings / `GET /api/agents`. |
 | `isolationStrategy` | string | `in-process` or `subprocess`. |
-| `thinking` | string | `none`, `low`, `medium`, or `high`. |
+| `thinking` | string | `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`. There is **no** `none`. |
 | `contextWindow` | number | Token budget, e.g. `200000`. |
-| `toolIds` | string[] | Granted tools — subset of `read`, `write`, `edit`, `bash`, `grep`, `glob`, `todo`, `web_search`, `web_fetch`. Keep in sync with TOOLS.md. |
+| `toolIds` | string[] | Granted tool ids. **Not a fixed list** — it depends on which extensions the gateway has loaded. Commonly available: `read`, `write`, `edit`, `ls`, `grep`, `glob`, `bash`, `exec`, `curl`, `todo`, `canvas`, `get_datetime`, `web_search`, `web_fetch`, `list_agents`, `list_locations`, `agent_converse`, `tool_output_continue`. Keep in sync with TOOLS.md. |
+| `emoji` | string | Optional avatar glyph shown in the portal. |
+| `subAgents` | object | Sub-agent delegation config, when the agent spawns others. |
+| `heartbeat` | object | Periodic wake config. Omit unless the agent needs one. |
 | `memory` | object | `{ "enabled": true, "indexing": "auto", "promptInjection": "full" }` |
 | `soul` | object | `{ "enabled": true, "timezone": "UTC", "dayBoundary": "00:00", "reflectionOnSeal": false }` |
 | `extensions` | object | Per-extension config; commonly `{ "botnexus-skills": { "enabled": true, "maxLoadedSkills": 20, "allowSkillCreation": false, "allowSkillDeletion": false } }` |
@@ -81,10 +84,21 @@ agents intact.
 3. Set `toolIds` to exactly the tools documented in the agent's TOOLS.md.
 4. Save, restart the gateway, and confirm the agent shows in `GET /api/agents`.
 
+> **Editing `config.json` by hand needs a restart; the REST API does not.**
+> `POST /api/agents` validates the descriptor, writes `config.json` and updates the live
+> registry atomically, so an agent created that way is available immediately. Use the API when
+> the gateway is running and you want the agent now; edit the file when it is stopped, or when
+> you want the change reviewed before it takes effect. Note the API spells one field
+> differently: `extensionConfig` on the wire, `extensions` in `config.json`.
+
 ## Pitfalls
 
 - The **id is the object key** under `agents`, not a field inside the object.
-- `thinking` and `isolationStrategy` accept only the enumerated values above.
+- `thinking` and `isolationStrategy` accept only the enumerated values above. `"none"` is
+  **not** a thinking level — the lowest is `minimal`.
+- An unknown key binds to nothing **silently**. There is no error for a typo like `apiProvider`
+  or `modelId` (the real keys are `provider` and `model`), so the agent simply loads without
+  that setting. Check a field name against a working agent before trusting it.
 - `toolIds` must be real tool ids; an unknown id is not granted.
 - `config.json` holds secrets — make a targeted edit, don't regenerate the file.
 - Restart is required for the gateway to pick up a new or changed agent.
