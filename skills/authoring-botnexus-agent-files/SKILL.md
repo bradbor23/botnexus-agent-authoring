@@ -1,8 +1,8 @@
 ---
 name: authoring-botnexus-agent-files
-description: Use when creating or editing a BotNexus agent's markdown files — AGENTS.md, SOUL.md, TOOLS.md, BOOTSTRAP.md, IDENTITY.md, USER.md. Explains each file's sections, what belongs where, the on-disk layout under ~/.botnexus/agents/<id>/, and the order the gateway loads them in. Also covers why none of them are required, and why WORLD.md is a world-level file at ~/.botnexus/WORLD.md rather than an agent file. Pair with the botnexus-agent-config-entry skill to also register the agent in config.json.
+description: Use when creating or editing a BotNexus agent's markdown files — AGENTS.md, SOUL.md, TOOLS.md, BOOTSTRAP.md, IDENTITY.md, USER.md. Explains each file's sections, what belongs where, the on-disk layout under ~/.botnexus/agents/<id>/workspace/, and the order the gateway loads them in. Also covers why the workspace/ level is required, why none of the files are, and why WORLD.md is a world-level file at ~/.botnexus/WORLD.md rather than an agent file. Pair with the botnexus-agent-config-entry skill to also register the agent in config.json.
 license: MIT
-compatibility: BotNexus gateway. Agent files live at ~/.botnexus/agents/<id>/ (uppercase filenames).
+compatibility: BotNexus gateway. Agent prompt files live at ~/.botnexus/agents/<id>/workspace/ (uppercase filenames), not the agent directory itself.
 allowed-tools: read, write, edit
 disable-model-invocation: false
 metadata:
@@ -12,19 +12,29 @@ metadata:
 # Authoring BotNexus agent files
 
 A BotNexus agent is a directory of uppercase markdown files under
-`~/.botnexus/agents/<id>/`. `<id>` is the agent's stable, kebab-case id and must match
+`~/.botnexus/agents/<id>/workspace/`. `<id>` is the agent's stable, kebab-case id and must match
 the key used in `config.json` (see the `botnexus-agent-config-entry` skill).
 
 ```
 ~/.botnexus/agents/<id>/
-  AGENTS.md      # peer agents, coordination patterns, memory notes
-  SOUL.md        # personality, values, communication style, boundaries
-  TOOLS.md       # per-tool usage guidance
-  BOOTSTRAP.md   # first-run setup instructions
-  IDENTITY.md    # name, role, expertise, how to address
-  USER.md        # preferences the agent should respect
-  MEMORY.md      # the agent's own memory (governed by memory config, not written by hand)
+  data/              # sessions and agent state, created for you
+  workspace/         # EVERY prompt file lives here
+    AGENTS.md        # peer agents, coordination patterns, memory notes
+    SOUL.md          # personality, values, communication style, boundaries
+    TOOLS.md         # per-tool usage guidance
+    BOOTSTRAP.md     # first-run setup instructions
+    IDENTITY.md      # name, role, expertise, how to address
+    USER.md          # preferences the agent should respect
+    MEMORY.md        # the agent's own memory (memory config governs it; don't hand-author)
 ```
+
+> **The `workspace/` level is required.** `WorkspaceContextBuilder` reads prompt files from
+> `agents/<id>/workspace/` and falls back to the agent directory *only when that subdirectory
+> does not exist* — which it always does, because the gateway scaffolds it (with starter files)
+> the first time the agent directory is created. A file left in `agents/<id>/` is therefore not
+> merely ignored: the scaffolded copy in `workspace/` is loaded **instead of it**, and nothing is
+> logged. `MigrateLegacyWorkspace` will not rescue it either — it returns early once
+> `workspace/` exists.
 
 **None of these files is required.** An agent with none of them runs fine — the gateway
 loads whichever exist and skips the rest. Write the ones that carry real content; an absent
@@ -37,7 +47,7 @@ default list entirely — including files not named here.
 
 > **WORLD.md is NOT an agent file.** It is read from **`~/.botnexus/WORLD.md`** — one
 > world-level file shared by every agent — and injected ahead of everything else. A
-> `WORLD.md` placed inside `~/.botnexus/agents/<id>/` is silently ignored unless you name it
+> `WORLD.md` placed anywhere under `~/.botnexus/agents/<id>/` is silently ignored unless you name it
 > explicitly in `systemPromptFiles`. Put environment-wide rules in the world file; put
 > agent-specific context in that agent's own files.
 
@@ -137,7 +147,8 @@ than adding a `WORLD.md` to the agent directory, which is not read.
 
 ## Steps
 
-1. Pick a kebab-case `<id>` and create `~/.botnexus/agents/<id>/`.
+1. Pick a kebab-case `<id>` and create `~/.botnexus/agents/<id>/workspace/`. The gateway
+   scaffolds this directory itself on first run; starting from what it scaffolds is safest.
 2. Write SOUL.md and IDENTITY.md first — they anchor the agent's behaviour.
 3. Write AGENTS.md and TOOLS.md; make sure the `### <tool>` blocks match the tools you
    intend to grant.

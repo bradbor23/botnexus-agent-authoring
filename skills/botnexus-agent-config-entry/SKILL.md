@@ -13,7 +13,8 @@ metadata:
 
 Agents are defined in `~/.botnexus/config.json` under the top-level `agents` object,
 **keyed by the agent id**. The id is the key, matches the agent's directory name
-(`~/.botnexus/agents/<id>/`), and is stable, lowercase kebab-case.
+(`~/.botnexus/agents/<id>/`, whose prompt files live in its `workspace/` subdirectory), and
+is stable, lowercase kebab-case.
 
 ```jsonc
 {
@@ -80,6 +81,7 @@ agents intact.
 ## Steps
 
 1. Choose the `<id>` (kebab-case) — it must match `~/.botnexus/agents/<id>/`.
+   (Its prompt files go one level deeper, in `workspace/` — see `authoring-botnexus-agent-files`.)
 2. Add the agent object under `agents`, keyed by `<id>`, using the fields above.
 3. Set `toolIds` to exactly the tools documented in the agent's TOOLS.md.
 4. Save, restart the gateway, and confirm the agent shows in `GET /api/agents`.
