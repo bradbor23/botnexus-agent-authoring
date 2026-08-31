@@ -1,7 +1,7 @@
 {
   "name": "botnexus-agent-authoring",
   "description": "Skills for hand-authoring BotNexus agents: the SOUL/IDENTITY/AGENTS/TOOLS markdown files and the config.json agent entry.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": { "name": "bradbor23" },
   "homepage": "https://github.com/bradbor23/botnexus-agent-authoring",
   "repository": "https://github.com/bradbor23/botnexus-agent-authoring.git",

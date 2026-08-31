@@ -4,12 +4,17 @@ A **skills-only BotNexus plugin** — a small, self-contained set of skills that
 agent to hand-author BotNexus agents: the `SOUL/IDENTITY/AGENTS/TOOLS` markdown files and
 the `config.json` agent entry.
 
-It doubles as the **end-to-end pilot** for the BotNexus plugin marketplace: it exercises
-the whole pipeline — fetch (`git clone`) → validate (`plugin.json` against the manifest
-schema) → install (promote to `~/.botnexus/plugins/<name>/`) → discover (two skills) —
-with **zero code**, so the pipeline can be proven before the code-carrying plugin format
-lands. (It's the skills-shaped companion to the Agent Builder *extension*, which serves a
-UI and therefore needs that future format.)
+It was the **end-to-end pilot** for the BotNexus plugin marketplace, exercising the whole
+pipeline — fetch (`git clone`) → validate (`plugin.json` against the manifest schema) →
+install (promote to `~/.botnexus/plugins/<name>/`) → discover (two skills) — with **zero
+code**.
+
+That format has since landed, and its companion
+[botnexus-agent-builder](https://github.com/bradbor23/botnexus-agent-builder) now ships as a
+code-carrying plugin: a wizard that generates the same files this plugin teaches you to write
+by hand, and deploys them to a running gateway. The two are complementary — use the builder
+when you want an agent quickly, these skills when you are editing by hand or want to
+understand what the generated files mean.
 
 ## Layout
 
